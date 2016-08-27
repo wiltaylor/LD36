@@ -24,6 +24,8 @@ namespace Assets
 
         [Inject] private TileClickSignal.Trigger _trigger;
 
+        private bool _dirty;
+
         [Inject]
         public void Construct()
         {
@@ -53,15 +55,19 @@ namespace Assets
             for (var i = 0; i < tiledata.Length; i++)
                 tiledata[i].a = 1f;
 
-            //Debug.Log($"X: {realx} Y: {realy}");
             Sprite.texture.SetPixels(TileWidth * realx, TileHeight * realy, TileWidth, TileHeight, tiledata);
-            //Debug.Log($"X: {realx} Y: {realy} - OK");
+
+            _dirty = true;
 
         }
 
         public void Apply()
         {
+            if(!_dirty)
+                return;
+
             Sprite.texture.Apply();
+            _dirty = false;
         }
 
         void OnMouseDown()

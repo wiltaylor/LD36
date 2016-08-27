@@ -35,7 +35,7 @@ namespace Assets.Scripts.TileMap
             Container.BindFactory<TileBlockController, TileBlockController.Factory>().FromGameObject();
             
             //Camera
-            Container.Bind<Camera>().FromInstance(GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>());
+            Container.Bind<Camera>().FromInstance(GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>()).WhenInjectedInto<TileBlockController>();
 
             Container.BindSignal<TileClickSignal>();
             Container.BindTrigger<TileClickSignal.Trigger>().WhenInjectedInto<TileBlockController>();
