@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Assets.Scripts.TileMap.Data;
+using Assets.Scripts.TileMap.Data.Decorators;
 using Assets.Scripts.TileMap.LevelGenerator;
 using UnityEngine;
 using Zenject;
@@ -20,44 +21,46 @@ namespace Assets.Scripts.TileMap
         public TileTypeData[] TileTypeData;
 
         [Inject(Optional = true, Id = "LevelStartWidth")]
-        private int MapWidth = 64;
+        private int MapWidth = 256;
         [Inject(Optional = true, Id = "LevelStartHeight")]
-        private int MapHeight = 64;
+        private int MapHeight = 256;
 
         [Inject(Optional = true, Id = "LevelGenerators")] private IGenerator[] _generators = {
             new FillGenerator
             {
                 FillTile = TileTypes.Grass
             },
-
-            new ObjectDropperGenerator
-            {
-                Decorator = new TreeDecorator(),
-                Qty = 5000
-            },
             new PatchGenerator
             {
                 TileType = TileTypes.Rocks,
-                UpperRange = 20,
-                LowerRange = 5,
-                Qty = 5
+                Decorators = new ITileDecorator[] { new RockDecorator()},
+                UpperRange = 30,
+                LowerRange = 15,
+                Qty = 2
             },
             new PatchGenerator
             {
                 TileType = TileTypes.Water,
-                UpperRange = 20,
-                LowerRange = 5,
-                Qty = 5
+                Decorators = new ITileDecorator[] { new WaterDecorator()},
+                UpperRange = 25,
+                LowerRange = 20,
+                Qty = 1
+            },
+            new ObjectDropperGenerator
+            {
+                Decorator = new TreeDecorator(),
+                Qty = 5000
             }
         };
 
         public override void InstallBindings()
         {
-
-            //Container.Bind<List<IGenerator>>().FromInstance(_generators);
-
             foreach (var gen in _generators)
                 Container.Bind<IGenerator>().FromInstance(gen);
+
+            Container.Bind<int>().WithId("MapWidth").FromInstance(MapWidth);
+            Container.Bind<int>().WithId("MapHeight").FromInstance(MapHeight);
+            Container.Bind<int>().WithId("TilesPerBlock").FromInstance(32);
 
             Container.Bind<Sprite>()
                 .FromMethod(i =>
@@ -92,9 +95,7 @@ namespace Assets.Scripts.TileMap
 
             //TileMap
             Container.Bind<TileMap>().AsSingle().NonLazy();
-            Container.Bind<int>().WithId("MapWidth").FromInstance(MapWidth);
-            Container.Bind<int>().WithId("MapHeight").FromInstance(MapHeight);
-            Container.Bind<int>().WithId("TilesPerBlock").FromInstance(32);
+
 
             Container.BindCommand<ApplyTileMapCommand>()
                 .To<TileMap>(c => c.Apply).AsSingle();
@@ -105,13 +106,12 @@ namespace Assets.Scripts.TileMap
             Container.BindCommand<DecalUpdateCommand, int, int, DecalType>()
                 .To<TileMap>(controller => (x, y, type) => controller.SetDecal(x, y, type)).AsSingle();
 
+            Container.Bind<GameMap>().AsSingle();
             Container.Bind<IInitializable>().To<GameMap>().AsSingle().NonLazy();
             Container.Bind<WorldGenerator>().ToSelf().AsSingle();
 
-            
-            
-            //Debugging
-            //Container.Bind<TileDebug>().NonLazy();
+            Container.Bind<TileDebug>().NonLazy();
+
         }
     }
 }

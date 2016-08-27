@@ -6,6 +6,7 @@ namespace Assets.Scripts.TileMap.LevelGenerator
     public class PatchGenerator : IGenerator
     {
         public TileTypes TileType;
+        public ITileDecorator[] Decorators;
         public int UpperRange;
         public int LowerRange;
         public int Qty;
@@ -28,8 +29,20 @@ namespace Assets.Scripts.TileMap.LevelGenerator
 
                 for(var x = sx; x < ex; x++)
                     for (var y = sy; y < ey; y++)
+                    {
+                        if(map.Map[x,y].Blocked)
+                            continue;
+
                         map.Map[x, y].Type = TileType;
-                
+
+                        if(Decorators == null || Decorators.Length == 0)
+                            continue;
+                        
+                        foreach(var d in Decorators)
+                            map.Map[x,y].Decorators.Add(d);
+                    }
+                        
+                Qty--;
             }
         }
     }

@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿using Assets.Scripts.Actors;
+using Assets.Scripts.PathFinding;
+using Assets.Scripts.TileMap.Data;
+using UnityEngine;
 using Zenject;
 
 namespace Assets.Scripts.TileMap
@@ -8,30 +11,18 @@ namespace Assets.Scripts.TileMap
         private TileBlockController _blockController;
 
         [Inject]
-        public void Construct(TileMap map, TileClickSignal clicksignal)
+        public void Construct(GameMap map, TileClickSignal clicksignal)
         {
-
             clicksignal.Event += (x, y) =>
             {
-                map.SetTile(x, y, TileTypes.Grass);
-                map.SetDecal(x, y, DecalType.Tree);
-                map.Apply();
-                    
+                var npc = GameObject.FindGameObjectWithTag("Debug").GetComponent<PathFinderFollower>();
+                npc.Map = map;
+                npc.Pathfinder = new PathFinder();
+                npc.Initialize();
 
+                npc.MoveTo(x, y);
+                
             };
-
-            for (int x = 0; x < 1024; x++)
-            {
-                for (int y = 0; y < 1024; y++)
-                {
-                    map.SetTile(x,y, TileTypes.Dirt);
-                    if(Random.Range(0,3) == 1)
-                        map.SetDecal(x, y, DecalType.Tree);
-                }
-            }
-
-            map.Apply();
-               
         }
     }
 }
