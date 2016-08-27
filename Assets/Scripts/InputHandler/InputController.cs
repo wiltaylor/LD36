@@ -31,6 +31,16 @@ namespace Assets.Scripts.InputHandler
             {
                 _scrollTrigger.Fire(ScrollDirection.Left);
             }
+
+            if (UnityEngine.Input.GetAxis("Mouse ScrollWheel") < 0f)
+            {
+                _scrollTrigger.Fire(ScrollDirection.ScrollDown);
+            }
+
+            if (UnityEngine.Input.GetAxis("Mouse ScrollWheel") > 0f)
+            {
+                _scrollTrigger.Fire(ScrollDirection.ScrollUp);
+            }
         }
     }
 }

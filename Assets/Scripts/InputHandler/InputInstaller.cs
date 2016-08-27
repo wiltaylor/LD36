@@ -11,7 +11,7 @@ namespace Assets.Scripts.InputHandler
         {
             //Camera
             Container.Bind<Camera>().FromInstance(GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>());
-
+            
             Container.BindSignal<ScrollSignal>();
             Container.BindTrigger<ScrollSignal.Trigger>().WhenInjectedInto<InputController>();
             Container.Bind<InputController>().AsSingle().NonLazy();

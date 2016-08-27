@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Security.Policy;
 using Assets.Scripts.TileMap;
 using UnityEngine;
 using Zenject;
@@ -22,7 +22,7 @@ namespace Assets
 
         [Inject] public TileSet _tileset;
 
-        [Inject] private TileClickSignal.Trigger _trigger;
+        [Inject] private TileClickSignal.Trigger _clickTrigger;
 
         private bool _dirty;
 
@@ -37,6 +37,34 @@ namespace Assets
             col.size = new Vector2(Sprite.texture.width*0.01f, Sprite.texture.height*0.01f);
             col.offset = new Vector2(col.size.x/2, col.size.y/2);
             col.isTrigger = true;
+        }
+
+        public void SetDecal(int x, int y, DecalType type)
+        {
+            if (x < LeftTileX || x > LeftTileX + TileWidth - 1)
+                return;
+            if (y < BottomTileY || y > BottomTileY + TileHeight - 1)
+                return;
+
+            var realx = x - LeftTileX;
+            var realy = y - BottomTileY;
+
+            var spritedata = _tileset.GetDecal(type);
+
+            var tiledata = spritedata.texture.GetPixels(0, 0, TileWidth, TileHeight);
+            var sourcedata = Sprite.texture.GetPixels(TileWidth*realx, TileHeight*realy, TileWidth, TileHeight);
+            var result = new Color[tiledata.Length];
+
+            for (var i = 0; i < tiledata.Length; i++)
+                result[i] = Color.Lerp(sourcedata[i], tiledata[i], tiledata[i].a);
+
+
+            //            for (var i = 0; i < tiledata.Length; i++)
+            //                tiledata[i].a = 1f;
+
+            Sprite.texture.SetPixels(TileWidth * realx, TileHeight * realy, TileWidth, TileHeight, result);
+            
+            _dirty = true;
         }
 
         public void SetTile(int x, int y, TileTypes type)
@@ -79,7 +107,7 @@ namespace Assets
             var tilex = (int)((cords.x / 32) * 100) + LeftTileX;
             var tiley = (int)((cords.y / 32) * 100) + BottomTileY;
 
-            _trigger.Fire(tilex, tiley);
+            _clickTrigger.Fire(tilex, tiley);
         }
 
         public class Factory : Factory<TileBlockController>

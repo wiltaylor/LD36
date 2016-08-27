@@ -7,7 +7,9 @@ namespace Assets.Scripts.Input
         Up,
         Down,
         Left,
-        Right
+        Right,
+        ScrollUp,
+        ScrollDown
     }
 
     public class ScrollSignal : Signal<ScrollDirection>

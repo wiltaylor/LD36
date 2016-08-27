@@ -44,6 +44,12 @@ namespace Assets.Scripts.TileMap
                 b.SetTile(x,y,type);
         }
 
+        public void SetDecal(int x, int y, DecalType type)
+        {
+            foreach(var b in _blocks)
+                b.SetDecal(x,y,type);
+        }
+
         public void Apply()
         {
             foreach (var b in _blocks)
