@@ -1,6 +1,6 @@
 ﻿using Zenject;
 
-namespace Assets.Scripts.Input
+namespace Assets.Scripts.InputHandler
 {
     public enum ScrollDirection
     {

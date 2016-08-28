@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace Assets.Scripts.PathFinding
 {
@@ -11,26 +13,42 @@ namespace Assets.Scripts.PathFinding
         public int DiaginalMoveCost = 14;
         public int TargetX;
         public int TargetY;
+        public int StartX;
+        public int StartY;
+        public Action<PathFindingResult> ResultFound;
+        public int IterationsPerCycle = 10;
 
         private readonly List<PathFindingNode> _openList = new List<PathFindingNode>();
         private readonly List<PathFindingNode> _closedList = new List<PathFindingNode>();
 
-        public PathFindingResult FindPath(int startx, int starty, int endx, int endy)
+        public void FindPath(int startx, int starty, int endx, int endy, MonoBehaviour behaviour)
+        {
+            behaviour.StopAllCoroutines();
+
+            StartX = startx;
+            StartY = starty;
+            TargetX = endx;
+            TargetY = endy;
+            _openList.Clear();
+            _closedList.Clear();
+
+            behaviour.StartCoroutine(FindPath());
+        }
+
+        public IEnumerator FindPath()
         {
             var startnode = new PathFindingNode
             {
                 GCost = 0,
-                HCost = CalculateH(startx, starty, endx, endy),
-                X = startx,
-                Y = starty
+                HCost = CalculateH(StartX, StartY, TargetX, TargetY),
+                X = StartX,
+                Y = StartY
             };
-
-            TargetX = endx;
-            TargetY = endy;
 
             _openList.Add(startnode);
 
             var currentnode = default(PathFindingNode);
+            var currentIterations = IterationsPerCycle;
 
             while (true)
             {
@@ -38,9 +56,13 @@ namespace Assets.Scripts.PathFinding
 
 
                 if (currentnode == null)
-                    return null;
+                {
+                    ResultFound(null);
+                    yield break;
+                }
 
-                if (currentnode.X == endx && currentnode.Y == endy)
+
+                if (currentnode.X == TargetX && currentnode.Y == TargetY)
                     break;
 
                 _openList.Remove(currentnode);
@@ -54,6 +76,15 @@ namespace Assets.Scripts.PathFinding
                 AddToOpenListIfBetter(GetNode(currentnode.X - 1, currentnode.Y + 1, currentnode, true), currentnode, true);
                 AddToOpenListIfBetter(GetNode(currentnode.X + 1, currentnode.Y - 1, currentnode, true), currentnode, true);
                 AddToOpenListIfBetter(GetNode(currentnode.X + 1, currentnode.Y + 1, currentnode, true), currentnode, true);
+
+                currentIterations--;
+
+                if (currentIterations < 0)
+                {
+                    currentIterations = IterationsPerCycle;
+                    yield return null;
+                }
+                
 
             }
 
@@ -79,7 +110,7 @@ namespace Assets.Scripts.PathFinding
                     break;
             }
 
-            return result;
+            ResultFound(result);
         }
 
         private void AddToOpenListIfBetter(PathFindingNode node, PathFindingNode parentCandidate, bool diagonal)

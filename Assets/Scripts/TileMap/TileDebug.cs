@@ -13,12 +13,11 @@ namespace Assets.Scripts.TileMap
         [Inject]
         public void Construct(GameMap map, TileClickSignal clicksignal)
         {
-            clicksignal.Event += (x, y) =>
+            clicksignal.Event += (b, x, y) =>
             {
                 var npc = GameObject.FindGameObjectWithTag("Debug").GetComponent<PathFinderFollower>();
                 npc.Map = map;
                 npc.Pathfinder = new PathFinder();
-                npc.Initialize();
 
                 npc.MoveTo(x, y);
                 

@@ -1,5 +1,4 @@
-﻿using Assets.Scripts.Input;
-using UnityEngine;
+﻿using UnityEngine;
 using Zenject;
 
 namespace Assets.Scripts.InputHandler
@@ -11,7 +10,9 @@ namespace Assets.Scripts.InputHandler
         {
             //Camera
             Container.Bind<Camera>().FromInstance(GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>());
-            
+
+            Container.BindSignal<MouseReleaseSignal>();
+            Container.BindTrigger<MouseReleaseSignal.Trigger>().WhenInjectedInto<InputController>();
             Container.BindSignal<ScrollSignal>();
             Container.BindTrigger<ScrollSignal.Trigger>().WhenInjectedInto<InputController>();
             Container.Bind<InputController>().AsSingle().NonLazy();

@@ -1,6 +1,6 @@
-﻿using Assets.Scripts.Input;
-using Zenject;
+﻿using Assets.Scripts.PlayerControls;
 using UnityEngine;
+using Zenject;
 
 namespace Assets.Scripts.InputHandler
 {
@@ -10,34 +10,68 @@ namespace Assets.Scripts.InputHandler
         [Inject]
         private ScrollSignal.Trigger _scrollTrigger;
 
+        [Inject]
+        private Camera _camera;
+
+        [Inject] private PlayerSessionModifiers _sessionModifiers;
+        [Inject] private MouseReleaseSignal.Trigger _mouseReleaseTrigger;
+
+        private bool _rightMouseDownHandled;
+
         public void Tick()
         {
-            if (UnityEngine.Input.GetAxis("Vertical") > 0f)
+
+            if(Input.GetKeyDown(KeyCode.LeftControl))
+                _sessionModifiers.MultiSelectDown = true;
+            if(Input.GetKeyUp(KeyCode.LeftControl))
+                _sessionModifiers.MultiSelectDown = false;
+
+
+            if (Input.GetMouseButtonDown(1))
+            {
+                var coords = _camera.ScreenToWorldPoint(Input.mousePosition);
+
+                var hit = Physics2D.OverlapPoint(coords);
+
+                if (hit != null)
+                    hit.SendMessage("OnRightMouseDown");       
+            }
+
+            if(Input.GetMouseButtonUp(0))
+                _mouseReleaseTrigger.Fire(0);
+
+            if (Input.GetMouseButtonUp(1))
+                _mouseReleaseTrigger.Fire(1);
+
+            if (_sessionModifiers.Dragging)
+                _sessionModifiers.DragCurrent = Input.mousePosition;
+            
+            if (Input.GetAxis("Vertical") > 0f)
             {
                 _scrollTrigger.Fire(ScrollDirection.Up);
             }
 
-            if (UnityEngine.Input.GetAxis("Vertical") < 0f)
+            if (Input.GetAxis("Vertical") < 0f)
             {
                 _scrollTrigger.Fire(ScrollDirection.Down);
             }
 
-            if (UnityEngine.Input.GetAxis("Horizontal") > 0f)
+            if (Input.GetAxis("Horizontal") > 0f)
             {
                 _scrollTrigger.Fire(ScrollDirection.Right);
             }
 
-            if (UnityEngine.Input.GetAxis("Horizontal") < 0f)
+            if (Input.GetAxis("Horizontal") < 0f)
             {
                 _scrollTrigger.Fire(ScrollDirection.Left);
             }
 
-            if (UnityEngine.Input.GetAxis("Mouse ScrollWheel") < 0f)
+            if (Input.GetAxis("Mouse ScrollWheel") < 0f)
             {
                 _scrollTrigger.Fire(ScrollDirection.ScrollDown);
             }
 
-            if (UnityEngine.Input.GetAxis("Mouse ScrollWheel") > 0f)
+            if (Input.GetAxis("Mouse ScrollWheel") > 0f)
             {
                 _scrollTrigger.Fire(ScrollDirection.ScrollUp);
             }

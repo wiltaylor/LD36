@@ -107,7 +107,18 @@ namespace Assets
             var tilex = (int)((cords.x / 32) * 100) + LeftTileX;
             var tiley = (int)((cords.y / 32) * 100) + BottomTileY;
 
-            _clickTrigger.Fire(tilex, tiley);
+            _clickTrigger.Fire(0, tilex, tiley);
+        }
+
+        void OnRightMouseDown()
+        {
+            var worldcords = _camera.ScreenToWorldPoint(Input.mousePosition);
+            var cords = worldcords - transform.position;
+
+            var tilex = (int)((cords.x / 32) * 100) + LeftTileX;
+            var tiley = (int)((cords.y / 32) * 100) + BottomTileY;
+
+            _clickTrigger.Fire(1, tilex, tiley);
         }
 
         public class Factory : Factory<TileBlockController>

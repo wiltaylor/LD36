@@ -5,12 +5,12 @@ using Zenject;
 
 namespace Assets.Scripts.Actors
 {
-    public class PathFinderFollower : MonoBehaviour, IInitializable
+    public class PathFinderFollower : MonoBehaviour
     {
-        //[Inject]
+        [Inject]
         public PathFinder Pathfinder;
 
-        //[Inject]
+        [Inject]
         public GameMap Map;
 
         private PathFindingResult _currentpath;
@@ -28,15 +28,21 @@ namespace Assets.Scripts.Actors
                 _currentpath = null;
                 return;
             }
-                
-
+               
             var position = CordUtil.WorldToTile(transform.position);
             var currentx = position.First;
             var currenty = position.Second;
-            _currentpath = Pathfinder.FindPath(currentx, currenty, x, y);
 
-            _nextworldpos = CordUtil.TileToWorld(_currentpath.X, _currentpath.Y);
+            Pathfinder.ResultFound = r =>
+            {
+                _currentpath = r;
 
+                if(_currentpath != null)
+                    _nextworldpos = CordUtil.TileToWorld(_currentpath.X, _currentpath.Y);
+            };
+
+            _currentpath = null;
+            Pathfinder.FindPath(currentx, currenty, x, y, this);
         }
 
         void FixedUpdate()
@@ -57,7 +63,7 @@ namespace Assets.Scripts.Actors
             transform.position = Vector3.MoveTowards(transform.position, _nextworldpos, Speed * Time.fixedDeltaTime);
         }
 
-        public void Initialize()
+        public void Start()
         {
             Pathfinder.CheckNode = (x, y) =>
             {
