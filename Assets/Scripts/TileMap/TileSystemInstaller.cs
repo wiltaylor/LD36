@@ -110,6 +110,8 @@ namespace Assets.Scripts.TileMap
             Container.Bind<IInitializable>().To<GameMap>().AsSingle().NonLazy();
             Container.Bind<WorldGenerator>().ToSelf().AsSingle();
 
+            Container.Bind<UnitDecorator>().AsSingle();
+
             //Container.Bind<TileDebug>().NonLazy();
 
         }

@@ -12,6 +12,9 @@ namespace Assets.Scripts.Actors
             Container.Bind<PathFinder>();
             Container.BindSignal<UnitClickSignal>();
             Container.BindTrigger<UnitClickSignal.Trigger>().WhenInjectedInto<UnitController>();
+            Container.BindSignal<BuildingClickSignal>();
+            Container.BindTrigger<BuildingClickSignal.Trigger>().WhenInjectedInto<BuildingController>();
+
             //Container.Bind<IInitializable>().To<PathFinderFollower>();
         }
     }

@@ -1,29 +1,22 @@
-﻿using Assets.Scripts.Actors;
-using UnityEngine;
+﻿using UnityEngine;
+using Assets.Scripts.Actors;
 using Zenject;
 
-public class UnitController : MonoBehaviour
+public class BuildingController : MonoBehaviour
 {
+    public GameObject SelectionBox;
     public int PlayerOwner;
     public float HP;
     public float MaxHP;
 
     [Inject]
-    private UnitClickSignal.Trigger _clickTrigger;
-
-    public GameObject SelectionBox;
-
-    public PathFinderFollower PathFinderFollower;
-    public void Start()
-    {
-        PathFinderFollower = GetComponent<PathFinderFollower>();
-    }
+    private BuildingClickSignal.Trigger _clickTrigger;
 
     public void FixedUpdate()
     {
         if (HP <= 0)
         {
-            //Unit dies
+            //Building dies
             Destroy(gameObject);
         }
     }
@@ -37,7 +30,7 @@ public class UnitController : MonoBehaviour
     {
         SelectionBox.SetActive(false);
     }
-    
+
     void OnMouseDown()
     {
         _clickTrigger.Fire(0, this);
@@ -47,4 +40,5 @@ public class UnitController : MonoBehaviour
     {
         _clickTrigger.Fire(1, this);
     }
+
 }

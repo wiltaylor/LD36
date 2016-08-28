@@ -9,7 +9,7 @@ namespace Assets.Scripts.PlayerControls
         public override void InstallBindings()
         {
             Container.Bind<PlayerSessionModifiers>().AsSingle();
-            Container.Bind<UnitSelectionManager>().AsSingle().NonLazy();
+            Container.Bind<PlayerSelectionManager>().AsSingle().NonLazy();
             Container.Bind<SelectionBoxDrawer>().FromGameObject().AsSingle().NonLazy();
         }
     }

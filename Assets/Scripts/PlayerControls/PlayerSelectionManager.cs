@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Assets.Scripts.Actors;
 using Assets.Scripts.InputHandler;
 using Assets.Scripts.TileMap;
@@ -7,33 +8,45 @@ using Zenject;
 
 namespace Assets.Scripts.PlayerControls
 {
-    public class UnitSelectionManager
+    public class PlayerSelectionManager
     {
-        private readonly List<UnitController> _selected = new List<UnitController>();
+        private readonly List<UnitController> _selectedUnits = new List<UnitController>();
+        private BuildingController _selectedBuilding;
 
         [Inject]
         private Camera _camera;
 
-        public UnitSelectionManager(UnitClickSignal unitClickSignal, TileClickSignal tileClickSignal, PlayerSessionModifiers modifiers, MouseReleaseSignal mouseRelease)
+        public PlayerSelectionManager(UnitClickSignal unitClickSignal, BuildingClickSignal buildingClickSignal, TileClickSignal tileClickSignal, PlayerSessionModifiers modifiers, MouseReleaseSignal mouseRelease)
         {
+
+            Action clearBuildings = () =>
+            {
+                if(_selectedBuilding != null)
+                    _selectedBuilding.Deselect();
+
+                _selectedBuilding = null;
+
+            };
+
+            Action clearSelection = () =>
+            {
+                foreach (var s in _selectedUnits)
+                    s.Deselect();
+                _selectedUnits.Clear();
+
+                clearBuildings();
+            };
+
             mouseRelease.Event += btn =>
             {
                 if (btn == 0 && modifiers.Dragging)
                 {
                     modifiers.Dragging = false;
 
-                    foreach (var s in _selected)
-                        s.Deselect();
-                    _selected.Clear();
+                    clearSelection();
 
                     var startpoint = _camera.ScreenToWorldPoint(modifiers.DragStart);
                     var endpoint = _camera.ScreenToWorldPoint(modifiers.DragCurrent);
-                    var size = new Vector2(endpoint.x - startpoint.x, endpoint.y - startpoint.y);
-                    var mask = LayerMask.NameToLayer("Units");
-
-                    Debug.Log($"[{startpoint.x}/{startpoint.y}] - [{endpoint.x}/{endpoint.y}]");
-
-                    //var allunits = Physics2D.OverlapBoxAll(startpoint, size, 0f, mask, -10, 10);
 
                     var allunits = Physics2D.OverlapAreaAll(startpoint, endpoint);
 
@@ -46,7 +59,7 @@ namespace Assets.Scripts.PlayerControls
                         var ctrl = unit.GetComponent<UnitController>();
 
                         ctrl.Select();
-                        _selected.Add(ctrl);
+                        _selectedUnits.Add(ctrl);
                     }
                 }
             };
@@ -58,28 +71,37 @@ namespace Assets.Scripts.PlayerControls
                 {
                     if (!modifiers.MultiSelectDown)
                     {
-                        foreach (var s in _selected)
-                            s.Deselect();
-                        _selected.Clear();
+                        clearSelection();
                     }
                     else
                     {
-                        if (_selected.Contains(ctrl))
+                        if (_selectedUnits.Contains(ctrl))
                         {
-                            _selected.Remove(ctrl);
+                            _selectedUnits.Remove(ctrl);
                             ctrl.Deselect();
                             return;
                         }
                     }
 
-                    _selected.Add(ctrl);
+                    clearBuildings();
+                    _selectedUnits.Add(ctrl);
                     ctrl.Select();
                 }
                 else
                 {
-                    _selected.Remove(ctrl);
+                    _selectedUnits.Remove(ctrl);
                     ctrl.Deselect();
                 }
+            };
+
+            buildingClickSignal.Event += (btn, ctrl) =>
+            {
+                if (btn != 0) return;
+
+                clearSelection();
+
+                ctrl.Select();
+                _selectedBuilding = ctrl;
             };
 
             tileClickSignal.Event += (btn, x, y) =>
@@ -92,7 +114,7 @@ namespace Assets.Scripts.PlayerControls
 
                 if (btn == 1)
                 {
-                    foreach (var unit in _selected)
+                    foreach (var unit in _selectedUnits)
                         unit.PathFinderFollower.MoveTo(x, y);
                     
                 }

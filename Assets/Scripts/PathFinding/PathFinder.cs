@@ -16,7 +16,7 @@ namespace Assets.Scripts.PathFinding
         public int StartX;
         public int StartY;
         public Action<PathFindingResult> ResultFound;
-        public int IterationsPerCycle = 10;
+        public int IterationsPerCycle = 50;
 
         private readonly List<PathFindingNode> _openList = new List<PathFindingNode>();
         private readonly List<PathFindingNode> _closedList = new List<PathFindingNode>();
