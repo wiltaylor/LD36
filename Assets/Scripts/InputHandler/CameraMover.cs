@@ -48,6 +48,13 @@ namespace Assets.Scripts.InputHandler
             _maxBoundY = MapHeight / 3.2f;
         }
 
+        public void MoveToTile(int x, int y)
+        {
+            var loc = CordUtil.TileToWorld(x, y);
+
+            Camera.transform.position = new Vector3(loc.x, loc.y, -10);
+        }
+
         private void OnScroll(ScrollDirection direction)
         {
             var pos = Camera.transform.position;

@@ -1,6 +1,7 @@
 ﻿using System.Security.Policy;
 using Assets.Scripts.TileMap;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using Zenject;
 
 namespace Assets
@@ -100,6 +101,8 @@ namespace Assets
 
         void OnMouseDown()
         {
+            if (EventSystem.current.IsPointerOverGameObject())
+                return;
 
             var worldcords = _camera.ScreenToWorldPoint(Input.mousePosition);
             var cords = worldcords - transform.position;

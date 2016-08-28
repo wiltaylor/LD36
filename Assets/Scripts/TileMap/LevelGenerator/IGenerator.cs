@@ -6,6 +6,7 @@ namespace Assets.Scripts.TileMap.LevelGenerator
 {
     public interface IGenerator
     {
+        WorldGenerator WorldGenerator { get; set; }
         void Generate(GameMap map);
     }
 }

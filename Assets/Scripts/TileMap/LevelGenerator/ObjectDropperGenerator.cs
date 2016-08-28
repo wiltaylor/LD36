@@ -8,6 +8,8 @@ namespace Assets.Scripts.TileMap.LevelGenerator
         public ITileDecorator Decorator;
         public int Qty;
 
+        public WorldGenerator WorldGenerator { get; set; }
+
         public void Generate(GameMap map)
         {
             var retry = 100;

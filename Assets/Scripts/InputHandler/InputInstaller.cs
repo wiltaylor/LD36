@@ -18,6 +18,7 @@ namespace Assets.Scripts.InputHandler
             Container.Bind<InputController>().AsSingle().NonLazy();
             Container.Bind<ITickable>().To<InputController>();
             Container.Bind<IInitializable>().To<CameraMover>().AsSingle().NonLazy();
+            Container.Bind<CameraMover>().AsSingle();
 
         }
     }

@@ -9,6 +9,7 @@ namespace Assets.Scripts.TileMap.Data.Decorators
     {
         public DecoratorType Type => DecoratorType.Resource;
         public DecalType DecalType => DecalType.None;
+        public MinableResourceType ResourceType => MinableResourceType.Rock;
         public bool Block => true;
     }
 }

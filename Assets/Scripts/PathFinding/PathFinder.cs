@@ -16,7 +16,7 @@ namespace Assets.Scripts.PathFinding
         public int StartX;
         public int StartY;
         public Action<PathFindingResult> ResultFound;
-        public int IterationsPerCycle = 50;
+        public int IterationsPerCycle = 5;
 
         private readonly List<PathFindingNode> _openList = new List<PathFindingNode>();
         private readonly List<PathFindingNode> _closedList = new List<PathFindingNode>();
@@ -97,6 +97,9 @@ namespace Assets.Scripts.PathFinding
             
             while (true)
             {
+                if (currentnode.Parent == null)
+                    break;
+
                 currentnode = currentnode.Parent;
 
                 result = new PathFindingResult
@@ -143,7 +146,10 @@ namespace Assets.Scripts.PathFinding
             if (openlist != null)
                 return openlist;
 
-            if (CheckNode(x, y))
+            if(CheckNode == null)
+                Debug.Log("fark");
+
+            if (CheckNode(x, y) || (x == TargetX && y == TargetY))
             {
                 return new PathFindingNode
                 {

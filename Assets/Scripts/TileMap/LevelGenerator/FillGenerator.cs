@@ -8,6 +8,8 @@ namespace Assets.Scripts.TileMap.LevelGenerator
         [Inject(Optional = true, Id = "FillTileGeneratorType")]
         public TileTypes FillTile = TileTypes.Grass;
 
+        public WorldGenerator WorldGenerator { get; set; }
+
         public void Generate(GameMap map)
         {
             for(var x = 0; x < map.MapWidth; x++)

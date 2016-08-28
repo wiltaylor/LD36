@@ -7,6 +7,8 @@ namespace Assets.Scripts.TileMap.LevelGenerator
     {
         public int Qty;
 
+        public WorldGenerator WorldGenerator { get; set; }
+
         public void Generate(GameMap map)
         {
             while (Qty >= 0)

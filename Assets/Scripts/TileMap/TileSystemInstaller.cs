@@ -112,7 +112,7 @@ namespace Assets.Scripts.TileMap
 
             Container.Bind<UnitDecorator>().AsSingle();
 
-            //Container.Bind<TileDebug>().NonLazy();
+            //Container.Bind<IInitializable>().To<TileDebug>().NonLazy();
 
         }
     }

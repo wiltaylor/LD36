@@ -6,22 +6,15 @@ using Zenject;
 
 namespace Assets.Scripts.TileMap
 {
-    public class TileDebug
+    public class TileDebug : IInitializable
     {
         private TileBlockController _blockController;
 
-        [Inject]
-        public void Construct(GameMap map, TileClickSignal clicksignal)
+        [Inject] private UnitFactory factory;
+        
+        public void Initialize()
         {
-            clicksignal.Event += (b, x, y) =>
-            {
-                var npc = GameObject.FindGameObjectWithTag("Debug").GetComponent<PathFinderFollower>();
-                npc.Map = map;
-                npc.Pathfinder = new PathFinder();
-
-                npc.MoveTo(x, y);
-                
-            };
+            factory.Create(UnitType.Worker, 0, 5, 5);
         }
     }
 }

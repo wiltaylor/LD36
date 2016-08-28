@@ -21,6 +21,7 @@ namespace Assets.Scripts.TileMap.Data
     {
         DecoratorType Type { get; }
         DecalType DecalType { get; }
+        MinableResourceType ResourceType { get; }
         bool Block { get; }
     }
 }

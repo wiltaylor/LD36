@@ -1,4 +1,6 @@
-﻿namespace Assets.Scripts.PlayerLogic
+﻿using UnityEngine;
+
+namespace Assets.Scripts.PlayerLogic
 {
     public enum PlayerType
     {
@@ -15,5 +17,9 @@
         public int Wood;
         public int Home;
         public int Stone;
+        public int StartSpawnX;
+        public int StartSpawnY;
+        public int EndSpawnX;
+        public int EndSpawnY;
     }
 }

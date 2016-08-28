@@ -47,20 +47,18 @@ namespace Assets.Scripts.LevelDecorators
         new ObjectDropperGenerator
         {
             Decorator = new TreeDecorator(),
-            Qty = 5
+            Qty = 100
         },
         new SpawnGenerator
         {
+            Players = 2,
             Range = 10,
             Tile = TileTypes.Sand,
-            BannedTypes = new[] { TileTypes.Water, TileTypes.Rocks}
+            BannedTypes = new[] { TileTypes.Water, TileTypes.Rocks},
+            Food = 1000,
+            Wood = 1000
         },
-        new SpawnGenerator
-        {
-            Range = 10,
-            Tile = TileTypes.Sand,
-            BannedTypes = new[] { TileTypes.Water, TileTypes.Rocks}
-        }
+        new PlayerStartGenerator()
     };
 
         public override void InstallBindings()

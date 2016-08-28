@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using Assets.Scripts.Actors;
 using Assets.Scripts.InputHandler;
+using Assets.Scripts.PlayerLogic;
 using Assets.Scripts.TileMap;
+using Assets.Scripts.TileMap.Data;
 using UnityEngine;
 using Zenject;
 
@@ -10,29 +12,30 @@ namespace Assets.Scripts.PlayerControls
 {
     public class PlayerSelectionManager
     {
-        private readonly List<UnitController> _selectedUnits = new List<UnitController>();
-        private BuildingController _selectedBuilding;
+        public readonly List<UnitController> SelectedUnits = new List<UnitController>();
+        public BuildingController SelectedBuilding;
+        public UnitController PrimaryUnit;
+
 
         [Inject]
         private Camera _camera;
 
-        public PlayerSelectionManager(UnitClickSignal unitClickSignal, BuildingClickSignal buildingClickSignal, TileClickSignal tileClickSignal, PlayerSessionModifiers modifiers, MouseReleaseSignal mouseRelease)
+        public PlayerSelectionManager(UnitClickSignal unitClickSignal, BuildingClickSignal buildingClickSignal, TileClickSignal tileClickSignal, PlayerSessionModifiers modifiers, MouseReleaseSignal mouseRelease, PlayerManager playerManager, GameMap map)
         {
-
             Action clearBuildings = () =>
             {
-                if(_selectedBuilding != null)
-                    _selectedBuilding.Deselect();
+                if(SelectedBuilding != null)
+                    SelectedBuilding.Deselect();
 
-                _selectedBuilding = null;
+                SelectedBuilding = null;
 
             };
 
             Action clearSelection = () =>
             {
-                foreach (var s in _selectedUnits)
+                foreach (var s in SelectedUnits)
                     s.Deselect();
-                _selectedUnits.Clear();
+                SelectedUnits.Clear();
 
                 clearBuildings();
             };
@@ -50,17 +53,29 @@ namespace Assets.Scripts.PlayerControls
 
                     var allunits = Physics2D.OverlapAreaAll(startpoint, endpoint);
 
+                    var buildingcandidate = default(BuildingController);
+                    var foundunit = false;
+
                     foreach (var unit in allunits)
                     {
+                        if (unit.tag == "Building")
+                            buildingcandidate = unit.GetComponent<BuildingController>();
 
-                        if(unit.tag != "Debug")
-                            continue;
-                        
-                        var ctrl = unit.GetComponent<UnitController>();
+                        if (unit.tag == "Unit")
+                        {
+                            var ctrl = unit.GetComponent<UnitController>();
 
-                        ctrl.Select();
-                        _selectedUnits.Add(ctrl);
+                            if (ctrl.PlayerOwner != playerManager.HumanPlayer.ID)
+                                continue;
+
+                            foundunit = true;
+                            ctrl.Select();
+                            SelectedUnits.Add(ctrl);
+                        }
                     }
+
+                    if (!foundunit && buildingcandidate != null)
+                        SelectedBuilding = buildingcandidate;
                 }
             };
             
@@ -69,28 +84,40 @@ namespace Assets.Scripts.PlayerControls
             {
                 if (btn == 0)
                 {
+                    if (ctrl.PlayerOwner != playerManager.HumanPlayer.ID)
+                        return;
+
                     if (!modifiers.MultiSelectDown)
                     {
                         clearSelection();
                     }
                     else
                     {
-                        if (_selectedUnits.Contains(ctrl))
+                        if (SelectedUnits.Contains(ctrl))
                         {
-                            _selectedUnits.Remove(ctrl);
+                            SelectedUnits.Remove(ctrl);
                             ctrl.Deselect();
+
+                            if (PrimaryUnit == ctrl)
+                                PrimaryUnit = null;
+
                             return;
                         }
                     }
 
                     clearBuildings();
-                    _selectedUnits.Add(ctrl);
+                    SelectedUnits.Add(ctrl);
                     ctrl.Select();
+                    PrimaryUnit = ctrl;
                 }
                 else
                 {
-                    _selectedUnits.Remove(ctrl);
-                    ctrl.Deselect();
+                    if (PrimaryUnit != null && ctrl.PlayerOwner != 0)
+                    {
+                        if (PrimaryUnit.CanAttack)
+                            PrimaryUnit.Attack(ctrl);
+                        
+                    }
                 }
             };
 
@@ -98,10 +125,13 @@ namespace Assets.Scripts.PlayerControls
             {
                 if (btn != 0) return;
 
+                if (ctrl.PlayerOwner != playerManager.HumanPlayer.ID)
+                    return;
+
                 clearSelection();
 
                 ctrl.Select();
-                _selectedBuilding = ctrl;
+                SelectedBuilding = ctrl;
             };
 
             tileClickSignal.Event += (btn, x, y) =>
@@ -114,8 +144,18 @@ namespace Assets.Scripts.PlayerControls
 
                 if (btn == 1)
                 {
-                    foreach (var unit in _selectedUnits)
-                        unit.PathFinderFollower.MoveTo(x, y);
+                    foreach (var unit in SelectedUnits)
+                    {
+                        if (map.Map[x, y].Minable && unit.CanHarvest)
+                        {
+                            unit.Harvest(x, y);
+                            return;
+                        }
+
+                        unit.GetComponent<PathFinderFollower>().MoveTo(x, y);
+                        unit.TargeType = TragetType.None;
+                    }
+                        
                     
                 }
             };

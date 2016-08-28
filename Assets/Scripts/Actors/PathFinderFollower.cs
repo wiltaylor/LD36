@@ -15,7 +15,7 @@ namespace Assets.Scripts.Actors
         public GameMap Map;
 
         [Inject]
-        private UnitDecorator _tileDecorator;
+        public UnitDecorator TileDecorator;
 
         private PathFindingResult _currentpath;
 
@@ -31,9 +31,13 @@ namespace Assets.Scripts.Actors
         public int CurrentX;
         public int CurrentY;
 
-        public void MoveTo(int x, int y)
+
+
+        public void MoveTo(int x, int y, bool ignoreblocking = false)
         {
-            if (Map.Map[x, y].Blocked)
+            SetupPathFinder();
+
+            if (Map.Map[x, y].Blocked && !ignoreblocking)
             {
                 _currentpath = null;
                 return;
@@ -60,6 +64,8 @@ namespace Assets.Scripts.Actors
 
         void FixedUpdate()
         {
+            SetupPathFinder();
+
             if (_currentpath == null)
                 return;
 
@@ -91,26 +97,32 @@ namespace Assets.Scripts.Actors
             transform.position = Vector3.MoveTowards(transform.position, _nextworldpos, Speed * Time.fixedDeltaTime);
         }
 
-        private void SwapPosition(int x, int y)
+        public void SwapPosition(int x, int y)
         {
-            Map.Map[CurrentX, CurrentY].Decorators.Remove(_tileDecorator);
-            Map.Map[x, y].Decorators.Add(_tileDecorator);
+            Map.Map[CurrentX, CurrentY].Decorators.Remove(TileDecorator);
+            Map.Map[x, y].Decorators.Add(TileDecorator);
 
             CurrentX = x;
             CurrentY = y;
         }
 
-        public void Start()
+        private void SetupPathFinder()
         {
+            if (Pathfinder.CheckNode != null)
+                return;
+
             Pathfinder.CheckNode = (x, y) =>
             {
+                if (Map == null)
+                    return false;
+
                 if (x < 0)
                     return false;
-                if (x > Map.MapWidth -1)
+                if (x > Map.MapWidth - 1)
                     return false;
                 if (y < 0)
                     return false;
-                if (y > Map.MapHeight -1 )
+                if (y > Map.MapHeight - 1)
                     return false;
                 return !Map.Map[x, y].Blocked;
             };

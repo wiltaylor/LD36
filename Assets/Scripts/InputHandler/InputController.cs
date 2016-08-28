@@ -1,5 +1,6 @@
 ﻿using Assets.Scripts.PlayerControls;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using Zenject;
 
 namespace Assets.Scripts.InputHandler
@@ -27,7 +28,7 @@ namespace Assets.Scripts.InputHandler
                 _sessionModifiers.MultiSelectDown = false;
 
 
-            if (Input.GetMouseButtonDown(1))
+            if (Input.GetMouseButtonDown(1) && !EventSystem.current.IsPointerOverGameObject())
             {
                 var coords = _camera.ScreenToWorldPoint(Input.mousePosition);
 
@@ -40,7 +41,7 @@ namespace Assets.Scripts.InputHandler
             if(Input.GetMouseButtonUp(0))
                 _mouseReleaseTrigger.Fire(0);
 
-            if (Input.GetMouseButtonUp(1))
+            if (Input.GetMouseButtonUp(1) && !EventSystem.current.IsPointerOverGameObject())
                 _mouseReleaseTrigger.Fire(1);
 
             if (_sessionModifiers.Dragging)
